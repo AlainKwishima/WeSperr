@@ -175,7 +175,7 @@ function Register() {
               </div>
             </form>
 
-            <OauthSignUp loading={oauthLoading} onClick={handleOauthSignUp} disabled={registering} /> {/* Pass OAuth loading state and disabled prop */}
+            <OauthSignUp loading={oauthLoading} onClick={handleOauthSignUp} /> {/* Pass OAuth loading state and disabled prop */}
 
             <div className="flex justify-center gap-1 text-xs tracking-wide text-dark-gray4 dark:text-indigo2/50">
               <div className="flex justify-center gap-1 ">
