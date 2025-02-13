@@ -1,0 +1,5 @@
+android-chrome-192x192
+android-chrome-512x512
+favicon-16x16
+favicon-32x32
+apple-touch-icon
