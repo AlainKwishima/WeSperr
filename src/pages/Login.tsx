@@ -123,7 +123,7 @@ function Login() {
               </div>
             </form>
 
-            <OauthSignUp loading={oauthLoading} onClick={handleOauthSignIn} disabled={verifying} /> {/* Pass OAuth loading state */}
+            <OauthSignUp loading={oauthLoading} onClick={handleOauthSignIn}/> {/* Pass OAuth loading state */}
 
             <div className="flex justify-center gap-1 text-xs tracking-wide text-dark-gray4 dark:text-indigo2/50">
               <div className="flex justify-center gap-1 ">
