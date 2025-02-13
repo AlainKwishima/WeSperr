@@ -1,76 +1,147 @@
-import { Button } from "@chakra-ui/react";
+import { Button, FocusLock, Input } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import remboLogo from "../assets/irembo-removebg-preview.png";
+import { FormEvent, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import OauthSignUp from "../components/OauthSignUp";
+import PasswordInput from "../components/PasswordInput";
+import { useAuth } from "../context/AuthContext";
+import api from "../services/api";
+import Loading from "./Loading";
+import appleTouchIcon from "../assets/CompressJPEG.Online_img(512x512) (3).png";
 
-interface OauthSignUpProps {
-  loading: boolean;
-  onClick: (provider: string) => void;
-  disabled: boolean; // Add disabled prop
+function Login() {
+  const { logIn, isLoading, currentUser, intended, currentUserDetails } = useAuth();
+  const navigate = useNavigate();
+
+  const [verifying, setVerifying] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(false); // Add state for OAuth loading
+
+  type Credentials = {
+    email: string;
+    password: string;
+  };
+
+  const [credentials, setCredentials] = useState<Credentials>({
+    email: "",
+    password: "",
+  });
+
+  async function handleOauthSignIn(provider: string) {
+    setOauthLoading(true); // Set OAuth loading state
+    api.handleOauth(provider);
+    setOauthLoading(false); // Reset OAuth loading state
+  }
+
+  function handleChange(name: string, value: string) {
+    setCredentials((prev) => ({ ...prev, [name]: value }));
+  }
+
+  async function handleEmailSignIn(e: FormEvent) {
+    e.preventDefault();
+    setVerifying(true);
+    logIn(credentials).finally(() => setVerifying(false));
+  }
+
+  useEffect(() => {
+    if (currentUser && currentUserDetails) {
+      navigate(intended || "/");
+    }
+  }, [currentUser, currentUserDetails]);
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: "-25%" }}
+      animate={{ opacity: 1, x: "0%" }}
+      transition={{ duration: 0.3 }}
+    >
+      <div className=" flex  items-center  transition-all [&>div]:w-full  ">
+        <FocusLock>
+          <div className="grid gap-4 rounded-xl border p-6 text-gray12 shadow dark:text-dark-slate12">
+            <div className="flex flex-col items-center space-y-2 text-center">
+              <img src={appleTouchIcon} alt="WeSperr Logo" className="w-17 h-17h
+               mb-2" /> {/* Add the logo image */}
+              <h1 className="text-2xl font-semibold leading-8 tracking-tight">
+              Log in to WeSperr Chat
+              </h1>
+              <h2 className="text-sm font-normal tracking-wide text-gray11 dark:text-indigo2/60">
+              Enter your email and password below
+              </h2>
+            </div>
+
+            <form onSubmit={handleEmailSignIn} className="mt-2 grid gap-5 ">
+              <div className="grid gap-3">
+                <div className="grid gap-2">
+                  <label
+                    htmlFor="email"
+                    className="text-sm leading-none text-gray10"
+                  >
+                    Email
+                  </label>
+                  <Input
+                    autoComplete="true"
+                    required
+                    id="email"
+                    type="email"
+                    value={credentials.email}
+                    onChange={(e) => {
+                      handleChange("email", e.target.value);
+                    }}
+                    placeholder="xyz@example.com"
+                  />
+                </div>
+                <div className="grid gap-2 ">
+                  <label
+                    htmlFor="password"
+                    className="text-sm leading-none text-gray10 "
+                  >
+                    Password
+                  </label>
+                  <PasswordInput
+                    value={credentials.password}
+                    onChange={(e) => {
+                      handleChange("password", e.target.value);
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="">
+                <Button
+                  as={motion.button}
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.98 }}
+                  type="submit"
+                  isLoading={verifying}
+                  loadingText="Verifying"
+                  className="w-full "
+                >
+                  Login
+                </Button>
+              </div>
+            </form>
+
+            <OauthSignUp loading={oauthLoading} onClick={handleOauthSignIn}/> {/* Pass OAuth loading state */}
+
+            <div className="flex justify-center gap-1 text-xs tracking-wide text-dark-gray4 dark:text-indigo2/50">
+              <div className="flex justify-center gap-1 ">
+                No account?
+                <Link
+                  to="/register"
+                  className="font-bold text-dark-blue4 underline dark:text-dark-blue10"
+                >
+                  Sign up
+                </Link>
+                instead
+              </div>
+            </div>
+          </div>{" "}
+        </FocusLock>
+      </div>
+    </motion.div>
+  );
 }
 
-const OauthSignUp = ({ loading, onClick, disabled }: OauthSignUpProps) => {
-  return (
-    <div className="mt-2 grid gap-2">
-      <div className="relative flex items-center justify-center">
-        <div className="absolute inset-0 items-center">
-          <div className="w-full border-t "></div>
-        </div>
-
-        <div className="relative -top-2 text-xs font-medium text-gray9">
-          <div className="rounded-full bg-gray1 px-4 uppercase dark:bg-dark-blue1">
-            Or Continue With
-          </div>
-        </div>
-      </div>
-      <div className="grid gap-2 transition-all md:grid-cols-2">
-        <Button
-          as={motion.button}
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.98 }}
-          variant={"outline"}
-          rounded={"full"}
-          leftIcon={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
-            >
-              <path
-                fill="currentColor"
-                d="M3.064 7.51A9.996 9.996 0 0 1 12 2c2.695 0 4.959.991 6.69 2.605l-2.867 2.868C14.786 6.482 13.468 5.977 12 5.977c-2.605 0-4.81 1.76-5.595 4.123c-.2.6-.314 1.24-.314 1.9c0 .66.114 1.3.314 1.9c.786 2.364 2.99 4.123 5.595 4.123c1.345 0 2.49-.355 3.386-.955a4.6 4.6 0 0 0 1.996-3.018H12v-3.868h9.418c.118.654.182 1.336.182 2.045c0 3.046-1.09 5.61-2.982 7.35C16.964 21.105 14.7 22 12 22A9.996 9.996 0 0 1 2 12c0-1.614.386-3.14 1.064-4.49Z"
-              />
-            </svg>
-          }
-          px={"12"}
-          isLoading={loading}
-          loadingText={"Verifying"}
-          onClick={() => onClick("google")}
-          isDisabled={disabled} // Disable button when form is submitting
-        >
-          Google
-        </Button>
-
-        <Button
-          as={motion.button}
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.98 }}
-          rounded={"full"}
-          variant={"outline"}
-          leftIcon={
-            <img src={remboLogo} alt="Rembo Logo" className="w-9 h-9 mr-1" />
-          }
-          px={"12"}
-          isLoading={loading}
-          loadingText={"Verifying"}
-          onClick={() => onClick("rembo")}
-          isDisabled={disabled} // Disable button when form is submitting
-        >
-          Login with Irembo
-        </Button>
-      </div>
-    </div>
-  );
-};
-
-export default OauthSignUp;
+export default Login;
